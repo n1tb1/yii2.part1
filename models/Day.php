@@ -30,6 +30,17 @@ class Day extends Model
      *
      * @var string
      */
-    public $body;
+    public $description;
+
+    public function attributeLabels()
+    {
+        return [
+            'title' => 'Задания на день',
+            'author' => 'Автор',
+            'activityName' => 'Название задания',
+            'action' => 'Действие',
+            'calendar' => 'Календарь'
+        ];
+    }
 }
 

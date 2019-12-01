@@ -2,8 +2,9 @@
 
 namespace app\controllers;
 
+use app\models\Activity;
 use yii\web\Controller;
-use yii\helpers\Url;
+use yii\web\UploadedFile;
 
 class ActivityController extends Controller
 {
@@ -14,8 +15,19 @@ class ActivityController extends Controller
      */
     public function actionIndex()
     {
-        $url = Url::previous();
+        $model = new Activity();
 
-        return '';
+        if (\Yii::$app->request->isPost) {
+            if ($model->load(\Yii::$app->request->post())) {
+                if ($model->validate()) {
+
+                    $model->files = UploadedFile::getInstances($model, 'files');
+
+                    return $this->render('index', ['model' => $model, 'post' => true]);
+                }
+            }
+        }
+
+        return $this->render('index', ['model' => $model]);
     }
 }
