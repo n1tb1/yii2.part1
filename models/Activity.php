@@ -12,6 +12,13 @@ use yii\base\Model;
 class Activity extends Model
 {
     /**
+     * Id события
+     *
+     * @var int
+     */
+    public $id;
+
+    /**
      * Приоритет события(главное, менее важное...)
      *
      * @var int
@@ -37,32 +44,17 @@ class Activity extends Model
      *
      * @var int
      */
-    public $startDay;
+    public $start;
 
     /**
      * День завершения события. Хранится в Unix timestamp
      *
      * @var int
      */
-    public $endDay;
+    public $end;
 
     /**
      * ID автора, создавшего события
-     *
-     * @var int
-     */
-
-    public $startTime;
-
-    /**
-     * Время начала события. Хранится в Unix timestamp
-     *
-     * @var int
-     */
-    public $endTime;
-
-    /**
-     * IВремя завершения события. Хранится в Unix timestamp
      *
      * @var int
      */
@@ -83,14 +75,53 @@ class Activity extends Model
      */
     public $body;
 
+    /**
+     * Файлы
+     *
+     * @var  array
+     */
+    public $files;
+
+    /**
+     * @return array the validation rules.
+     */
+    public function rules()
+    {
+        return [
+            [
+                [
+                    'title',
+                    'start',
+                    'end',
+                    'priority',
+                    'body'
+                ],
+                'required'
+            ],
+            [
+                [
+                    'start',
+                    'end'
+                ],
+                'integer'
+            ],
+            ['priority', 'boolean'],
+            ['body', 'string'],
+            [['files'], 'file', 'maxFiles' => 10]
+        ];
+    }
+
     public function attributeLabels()
     {
         return [
             'title' => 'Название события',
-            'startDay' => 'Дата начала',
-            'endDay' => 'Дата завершения',
+            'priority' => 'Главное событие',
+            'start' => 'Дата начала',
+            'end' => 'Дата завершения',
             'idAuthor' => 'ID автора',
-            'body' => 'Описание события'
+            'body' => 'Описание события',
+            'files' => 'Файлы',
+            'status' => 'Статус'
         ];
     }
 }
