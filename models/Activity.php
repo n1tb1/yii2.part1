@@ -59,7 +59,7 @@ class Activity extends Model
      * @var int
      */
 
-    public $idAuthor;
+    public $id_user;
 
     /**
      * Статус события (завершено или активно)
