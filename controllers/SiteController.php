@@ -9,6 +9,9 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\User;
+use app\models\SignupForm;
+
 
 class SiteController extends Controller
 {
@@ -27,6 +30,11 @@ class SiteController extends Controller
                         'allow' => true,
                         'roles' => ['@'],
                     ],
+                    /*[
+                        'actions' => ['admin'],
+                        'allow' => true,
+                        'roles' => ['admin'],
+                    ],*/
                 ],
             ],
             'verbs' => [
@@ -124,5 +132,48 @@ class SiteController extends Controller
     public function actionAbout()
     {
         return $this->render('about');
+    }
+
+    /*public function actionAddAdmin() {
+        $model = User::find()->where(['username' => 'admin'])->one();
+        if (empty($model)) {
+            $user = new User();
+            $user->username = 'admin';
+            $user->email = 'your@email.com';
+            $user->setPassword('your_password');
+            $user->generateAuthKey();
+            $user->save();
+        }
+    }*/
+
+    public function actionSignup()
+    {
+        $model = new SignupForm();
+
+        if ($model->load(Yii::$app->request->post())) {
+            if ($user = $model->signup()) {
+                if (Yii::$app->getUser()->login($user)) {
+                    return $this->goHome();
+                }
+            }
+        }
+
+        return $this->render('signup', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionAdmin()
+    {
+        echo "hello admin";
+    }
+
+    public function actionSetRoleToUser($role, $username)
+    {
+        $user = User::findByUsername($username);
+        $adminRole = \Yii::$app->authManager->getRole($role);
+        if (!Yii::$app->user->can($adminRole->name)) {
+            \Yii::$app->authManager->assign($adminRole, $user->id);
+        }
     }
 }

@@ -1,9 +1,10 @@
 <?php
 
 use yii\db\Migration;
+use \app\models\User;
 
 /**
- * Handles the creation of table `{{%users}}`.
+ * Handles the creation of table `{{%user}}`.
  */
 class m191203_163523_create_users_table extends Migration
 {
@@ -12,15 +13,23 @@ class m191203_163523_create_users_table extends Migration
      */
     public function safeUp()
     {
-        $this->createTable('{{%users}}', [
+        $tableOptions = null;
+
+        if ($this->db->driverName === 'mysql') {
+            $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
+        }
+
+        $this->createTable('{{%user}}', [
             'id' => $this->primaryKey(),
-            'username' => $this->string(30)->notNull(),
-            'password' => $this->string(30)->notNull(),
-            'auth_key' => $this->string(50)->notNull(),
-            'access_token' => $this->string(50)->notNull(),
-            'date_added' => $this->timestamp()->defaultExpression("now()"),
-            'status' => $this->tinyInteger(1),
-        ]);
+            'username' => $this->string()->notNull()->unique(),
+            'auth_key' => $this->string(32)->notNull(),
+            'password_hash' => $this->string()->notNull(),
+            'password_reset_token' => $this->string()->unique(),
+            'email' => $this->string()->notNull()->unique(),
+            'status' => $this->smallInteger()->notNull()->defaultValue(User::STATUS_ACTIVE),
+            'created_at' => $this->integer()->notNull(),
+            'updated_at' => $this->integer()->notNull(),
+        ], $tableOptions);
     }
 
     /**
@@ -28,6 +37,6 @@ class m191203_163523_create_users_table extends Migration
      */
     public function safeDown()
     {
-        $this->dropTable('{{%users}}');
+        $this->dropTable('{{%user}}');
     }
 }
