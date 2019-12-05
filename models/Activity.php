@@ -2,127 +2,93 @@
 
 namespace app\models;
 
-use yii\base\Model;
+use Yii;
 
 /**
- * Activity класс
+ * This is the model class for table "activity".
  *
- * Отражает сущность хранимого в календаре события
+ * @property int $id
+ * @property string|null $title
+ * @property int|null $started_at
+ * @property int|null $finished_at
+ * @property int|null $author_id
+ * @property int|null $main
+ * @property int|null $cycle
+ * @property int|null $created_at
+ * @property int|null $updated_at
+ *
+ * @property User $author
+ * @property Calendar[] $calendars
  */
-class Activity extends Model
+class Activity extends \yii\db\ActiveRecord
 {
     /**
-     * Id события
-     *
-     * @var int
+     * {@inheritdoc}
      */
-    public $id;
+    public static function tableName()
+    {
+        return 'activity';
+    }
 
     /**
-     * Приоритет события(главное, менее важное...)
-     *
-     * @var int
-     */
-    public $priority;
-
-    /**
-     * Повторяющееся ли событие
-     *
-     * @var boolean
-     */
-    public $isRepeatable;
-
-    /**
-     * Название события
-     *
-     * @var string
-     */
-    public $title;
-
-    /**
-     * День начала события. Хранится в Unix timestamp
-     *
-     * @var int
-     */
-    public $start;
-
-    /**
-     * День завершения события. Хранится в Unix timestamp
-     *
-     * @var int
-     */
-    public $end;
-
-    /**
-     * ID автора, создавшего события
-     *
-     * @var int
-     */
-
-    public $id_user;
-
-    /**
-     * Статус события (завершено или активно)
-     *
-     * @var boolean
-     */
-    public $status;
-
-    /**
-     * Описание события
-     *
-     * @var string
-     */
-    public $body;
-
-    /**
-     * Файлы
-     *
-     * @var  array
-     */
-    public $files;
-
-    /**
-     * @return array the validation rules.
+     * {@inheritdoc}
      */
     public function rules()
     {
         return [
+            [['started_at', 'finished_at', 'author_id', 'main', 'cycle', 'created_at', 'updated_at'], 'integer'],
+            [['title', 'started_at'], 'required'],
+            [['title'], 'string', 'max' => 255],
             [
-                [
-                    'title',
-                    'start',
-                    'end',
-                    'priority',
-                    'body'
-                ],
-                'required'
+                ['author_id'], 'exist', 'skipOnError' => true,
+                'targetClass' => User::className(),
+                'targetAttribute' => ['author_id' => 'id']
             ],
-            [
-                [
-                    'start',
-                    'end'
-                ],
-                'integer'
-            ],
-            ['priority', 'boolean'],
-            ['body', 'string'],
-            [['files'], 'file', 'maxFiles' => 10]
+            [['finished_at'], 'checkFinishedAt', 'skipOnEmpty' => false, 'skipOnError' => false]
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function attributeLabels()
     {
         return [
-            'title' => 'Название события',
-            'priority' => 'Главное событие',
-            'start' => 'Дата начала',
-            'end' => 'Дата завершения',
-            'idAuthor' => 'ID автора',
-            'body' => 'Описание события',
-            'files' => 'Файлы',
-            'status' => 'Статус'
+            'id' => 'ID',
+            'title' => 'Title',
+            'started_at' => 'Started At',
+            'finished_at' => 'Finished At',
+            'author_id' => 'Author ID',
+            'main' => 'Main',
+            'cycle' => 'Cycle',
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
         ];
     }
-}
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAuthor()
+    {
+        return $this->hasOne(User::className(), ['id' => 'author_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCalendars()
+    {
+        return $this->hasMany(Calendar::className(), ['activity_id' => 'id']);
+    }
+
+    public function checkFinishedAt($attribute, $params) {
+        if (!$this->hasErrors()) {
+            if(empty($this->$attribute)) {
+                $this->$attribute = $this->started_at;
+            } elseif($this->$attribute < $this->started_at) {
+                $this->addError($attribute, 'Finished at can not be lower then started at!');
+            }
+        }
+    }
+}

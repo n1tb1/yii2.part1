@@ -12,8 +12,8 @@ class m191203_203558_create_idx_fk_for_activity_table extends Migration
      */
     public function safeUp()
     {
-        $this->createIndex('activity_user_index', '{{%activity}}', ['id_user']);
-        $this->addForeignKey('fk_id_user', '{{%activity}}', ['id_user'], '{{%users}}', ['id'], 'CASCADE', 'CASCADE');
+        $this->createIndex('activity_user_index', '{{%activity}}', ['user_id']);
+        $this->addForeignKey('fk_user_id', '{{%activity}}', ['user_id'], '{{%user}}', ['id'], 'CASCADE', 'CASCADE');
     }
 
     /**
@@ -21,7 +21,7 @@ class m191203_203558_create_idx_fk_for_activity_table extends Migration
      */
     public function safeDown()
     {
+        $this->dropForeignKey('fk_user_id', '{{%activity}}');
         $this->dropIndex('activity_user_index', '{{%activity}}');
-        $this->dropForeignKey('fk_id_user', '{{%activity}}');
     }
 }

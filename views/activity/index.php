@@ -1,54 +1,44 @@
 <?php
 
-/* @var $this yii\web\View */
-
-/* @var $model app\models\Activity */
-
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
-use yii\bootstrap\Alert;
+use yii\grid\GridView;
 
+/* @var $this yii\web\View */
+/* @var $searchModel app\models\search\ActivitySearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Событие';
-$this->params['breadcrumbs'][] = ['label' => $model->getAttributeLabel('calendar'), 'url' => 'site/calendar'];
+$this->title = 'Activities';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="activity">
-  <h1><?= Html::encode($this->title) ?></h1>
+<div class="activity-index">
 
-    <?php
+    <h1><?= Html::encode($this->title) ?></h1>
 
-    echo isset($post) ? Alert::widget([
-        'options' => [
-            'class' => 'alert-success',
+    <p>
+        <?= Html::a('Create Activity', ['create'], ['class' => 'btn btn-success']) ?>
+    </p>
+
+    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => [
+            ['class' => 'yii\grid\SerialColumn'],
+
+            'id',
+            'title',
+            'started_at',
+            'finished_at',
+            'author_id',
+            //'main',
+            //'cycle',
+            //'created_at',
+            //'updated_at',
+
+            ['class' => 'yii\grid\ActionColumn'],
         ],
-        'body' => 'Validated!',
-    ]) : '';
+    ]); ?>
 
-
-    $form = ActiveForm::begin([
-        'options' => ['enctype' => 'multipart/form-data'],
-        'action' => ['index'],
-        'enableClientValidation' => false,
-        'method' => 'post',
-    ]);
-
-    echo $form->field($model, 'title')->textInput();
-    echo $form->field($model, 'priority')->checkbox();
-    echo $form->field($model, 'start')->textInput();
-    echo $form->field($model, 'end')->textInput();
-    echo $form->field($model, 'body')->textarea();
-    echo $form->field($model, 'status')->dropDownList([
-        '1' => 'Включено',
-        '0' => 'Выключено'
-    ]);
-
-    echo $form->field($model, 'files[]')->fileInput(['multiple' => true]);
-
-    echo Html::submitButton('Отправить',
-        ['class' => 'btn btn-success']);
-
-    ActiveForm::end();
-    ?>
 
 </div>
