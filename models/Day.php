@@ -12,11 +12,25 @@ use yii\base\Model;
 class Day extends Model
 {
     /**
+     * Id дня
+     *
+     * @var int
+     */
+    public $id;
+
+    /**
      * Тип дня (Будний или выходной день)
      *
      * @var int
      */
     public $type;
+
+    /**
+     * Дата в формате unixtimestamp
+     *
+     * @var date
+     */
+    public $date;
 
     /**
      * Массив с ID ключами событий, которые включает день
