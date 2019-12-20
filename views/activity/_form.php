@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use \kartik\date\DatePicker;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Activity */
@@ -14,19 +15,37 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'author_id')->textInput(['disabled' => true]) ?>
+    <?= $form->field($model, 'started_at')->widget(
+        DatePicker::className(),
+        [
+            'options' => ['placeholder' => 'Выберете дату начала'],
+            'language' => 'ru',
+            'pluginOptions' => [
+                'autoClose' => true,
+                'todayHighlight' => true,
+                'format' => 'dd.mm.yyyy'
+            ]
+        ]) ?>
 
-    <?= $form->field($model, 'started_at')->textInput() ?>
+    <?= $form->field($model, 'finished_at')->widget(
+        DatePicker::className(),
+        [
+            'options' => ['placeholder' => 'Выберете дату окончания'],
+            'language' => 'ru',
+            'pluginOptions' => [
+                'autoClose' => true,
+                'todayHighlight' => true,
+                'format' => 'dd.mm.yyyy'
+            ]
+        ]) ?>
 
-    <?= $form->field($model, 'finished_at')->textInput() ?>
+    <?= $form->field($model, 'main')->checkbox() ?>
 
-    <?= $form->field($model, 'main')->textInput() ?>
+    <?= $form->field($model, 'cycle')->checkbox() ?>
 
-    <?= $form->field($model, 'cycle')->textInput() ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
-    </div>
+  <div class="form-group">
+      <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+  </div>
 
     <?php ActiveForm::end(); ?>
 

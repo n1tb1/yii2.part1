@@ -5,11 +5,17 @@ $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
+    'language' => 'ru',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
+    ],
+    'modules' => [
+        'user-admin' => [
+            'class' => 'app\modules\admin\User',
+        ],
     ],
     'components' => [
         'request' => [
@@ -51,6 +57,13 @@ $config = [
         ],
         'authManager' => [
             'class' => 'yii\rbac\DbManager'
+        ],
+        'formatter' => [
+            'dateFormat' => 'php:d.m.Y',
+            'datetimeFormat' => 'php:d.m.Y H:i:s',
+            'decimalSeparator' => ',',
+            'thousandSeparator' => ' ',
+            'currencyCode' => 'RUR',
         ],
     ],
     'params' => $params,

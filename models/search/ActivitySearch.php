@@ -11,14 +11,20 @@ use app\models\Activity;
  */
 class ActivitySearch extends Activity
 {
+    public $authorEmail;
+    public $authorName;
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['id', 'started_at', 'finished_at', 'author_id', 'main', 'cycle', 'created_at', 'updated_at'], 'integer'],
+            [['id', 'author_id', 'main', 'cycle', 'created_at', 'updated_at'], 'integer'],
             [['title'], 'safe'],
+            [['started_at', 'finished_at'], 'date', 'format' => 'php:d.m.Y'],
+            [['authorEmail'], 'string'],
+            [['authorName'], 'string'],
         ];
     }
 
@@ -56,6 +62,24 @@ class ActivitySearch extends Activity
             return $dataProvider;
         }
 
+        if(!empty($this->started_at)) {
+            $this->filterByDate($query, 'started_at');
+        }
+
+        if(!empty($this->finished_at)) {
+            $this->filterByDate($query, 'finished_at');
+        }
+
+        if(!empty($this->authorEmail)) {
+            $query->joinWith('author as author');
+            $query->andWhere(['like', 'author.email', $this->authorEmail]);
+        }
+
+        if(!empty($this->authorName)) {
+            $query->joinWith('author as author');
+            $query->andWhere(['like', 'author.username', $this->authorName]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
@@ -71,5 +95,16 @@ class ActivitySearch extends Activity
         $query->andFilterWhere(['like', 'title', $this->title]);
 
         return $dataProvider;
+    }
+
+    private function filterByDate($query, $attribute) {
+        $start = (int)\Yii::$app->formatter->asTimestamp($this->$attribute . " 00:00:00");
+        $end = (int)\Yii::$app->formatter->asTimestamp($this->$attribute . " 00:00:00");
+        $query->andFilterWhere([
+            'between',
+            self::tableName() . ".$attribute",
+            $start,
+            $end,
+        ]);
     }
 }
