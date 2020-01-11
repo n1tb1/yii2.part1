@@ -9,8 +9,11 @@ use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
+use app\assets\CalendarAsset;
+
 
 AppAsset::register($this);
+CalendarAsset::register($this);
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -37,7 +40,7 @@ AppAsset::register($this);
     ]);
 
     $menuItems = [
-        ['label' => 'Home', 'url' => ['/site/index']],
+        ['label' => 'Home', 'url' => ['/']],
         ['label' => 'About', 'url' => ['/site/about']],
         ['label' => 'Contact', 'url' => ['/site/contact']],
     ];
@@ -46,7 +49,12 @@ AppAsset::register($this);
         $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
         $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
     } else {
-        $menuItems[] = ['label' => 'Users', 'url' => ['/user-admin']];
+        $menuItems[] = ['label' => 'Profile', 'url' => ['/profile']];
+
+        if (Yii::$app->user->can('admin')) {
+            $menuItems[] = ['label' => 'Users', 'url' => ['/user-admin']];
+        }
+
         $menuItems[] = ['label' => 'Activities', 'url' => ['/activity']];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')

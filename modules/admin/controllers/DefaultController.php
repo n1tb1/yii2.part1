@@ -98,8 +98,18 @@ class DefaultController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect('/user-admin');
+        if ($model->load(Yii::$app->request->post())) {
+
+            if(!empty($model->password)) {
+                $model->setPassword($model->password);
+                //$this->generatePassword(6);
+            } else {
+                unset($model->password_hash);
+            }
+
+            if($model->save()) {
+                return $this->redirect('/user-admin');
+            }
         }
 
         return $this->render('update', [
@@ -130,7 +140,7 @@ class DefaultController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = User::findOne($id)) !== null) {
+        if (($model = User::findOne(['id' => $id])) !== null) {
             return $model;
         }
 

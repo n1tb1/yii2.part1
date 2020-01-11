@@ -76,7 +76,7 @@ class Activity extends ActiveRecord
         ];
     }
 
-    public function checkEndDate($attr, $value)
+    public function checkEndDate($attr)
     {
         $startDateTimestamp = \Yii::$app->formatter->asTimestamp($this->started_at);
         $endDateTimestamp = \Yii::$app->formatter->asTimestamp($this->finished_at);

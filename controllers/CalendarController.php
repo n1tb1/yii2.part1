@@ -2,18 +2,20 @@
 
 namespace app\controllers;
 
-use app\models\Calendar;
+use edofre\fullcalendar\models\Event;
 use Yii;
-use app\models\Activity;
-use app\models\search\ActivitySearch;
+use app\models\Calendar;
+use app\models\search\CalendarSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
+use \yii\helpers\Url;
 
 /**
- * ActivityController implements the CRUD actions for Activity model.
+ * CalendarController implements the CRUD actions for Calendar model.
  */
-class ActivityController extends Controller
+class CalendarController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -21,45 +23,68 @@ class ActivityController extends Controller
     public function behaviors()
     {
         return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['logout'],
+                'rules' => [
+                    [
+                        'actions' => ['index', 'create', 'view', 'update', 'events'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
-            [
-                'class' => 'yii\filters\PageCache',
-                'only' => ['view'],
-                'duration' => Yii::$app->params['cacheExpire'],
-                'variations' => [
-                    \Yii::$app->language,
-                    \Yii::$app->request->get('id'),
-                ],
-                /*'dependency' => [
-                    'class' => 'yii\caching\DbDependency',
-                    'sql' => 'SELECT id FROM activity WHERE id = ' . Yii::$app->request->getQueryParam('id'),
-                ],*/
-            ],
         ];
     }
 
     /**
-     * Lists all Activity models.
+     * Lists all Calendar models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new ActivitySearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+        if(Yii::$app->user->isGuest) {
+            return $this->redirect('/login');
+        } else {
+            return $this->render('index');
+        }
     }
 
+    public function actionEvents($id, $start, $end) {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        $calendars = (new CalendarSearch())->search(['start' => $start, 'end' => $end]);
+
+        $result = [];
+
+        foreach ($calendars->models as $calendar) {
+            /** @var Calendar $calendar */
+
+            $activity = $calendar->activity;
+
+            $result[] = new Event([
+                'id' => $activity->id,
+                'title' => $activity->title,
+                'start' => Yii::$app->formatter->asDatetime($activity->started_at, 'php:c'),
+                'end' => Yii::$app->formatter->asDatetime($activity->finished_at, 'php:c'),
+                'editable' => false,
+                'startEditable' => false,
+                'durationEditable' => false,
+                'color' => 'red',
+                'url' => Url::to(['activity/view', 'id' => $activity->id])
+            ]);
+        }
+
+        return $result;
+    }
     /**
-     * Displays a single Activity model.
+     * Displays a single Calendar model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -72,21 +97,15 @@ class ActivityController extends Controller
     }
 
     /**
-     * Creates a new Activity model.
+     * Creates a new Calendar model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Activity();
+        $model = new Calendar();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
-            $calendar = new Calendar();
-            $calendar->user_id = Yii::$app->user->id;
-            $calendar->activity_id = $model->id;
-            $calendar->save();
-
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -96,7 +115,7 @@ class ActivityController extends Controller
     }
 
     /**
-     * Updates an existing Activity model.
+     * Updates an existing Calendar model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -116,7 +135,7 @@ class ActivityController extends Controller
     }
 
     /**
-     * Deletes an existing Activity model.
+     * Deletes an existing Calendar model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -130,15 +149,15 @@ class ActivityController extends Controller
     }
 
     /**
-     * Finds the Activity model based on its primary key value.
+     * Finds the Calendar model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Activity the loaded model
+     * @return Calendar the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Activity::findOne($id)) !== null) {
+        if (($model = Calendar::findOne($id)) !== null) {
             return $model;
         }
 
