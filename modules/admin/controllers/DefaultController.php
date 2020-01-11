@@ -1,19 +1,19 @@
 <?php
 
-namespace app\controllers;
+namespace app\modules\admin\controllers;
 
-use app\models\Calendar;
 use Yii;
-use app\models\Activity;
-use app\models\search\ActivitySearch;
+use yii\filters\AccessControl;
+use app\models\User;
+use app\modules\admin\models\search\UserSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * ActivityController implements the CRUD actions for Activity model.
+ * Default controller for the `user` module
  */
-class ActivityController extends Controller
+class DefaultController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -21,35 +21,33 @@ class ActivityController extends Controller
     public function behaviors()
     {
         return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['index', 'create', 'update', 'view', 'delete'],
+                'rules' => [
+                    [
+                        'actions' => ['index', 'create', 'update', 'view', 'delete'],
+                        'allow' => true,
+                        'roles' => ['admin'],
+                    ],
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
-            [
-                'class' => 'yii\filters\PageCache',
-                'only' => ['view'],
-                'duration' => Yii::$app->params['cacheExpire'],
-                'variations' => [
-                    \Yii::$app->language,
-                    \Yii::$app->request->get('id'),
-                ],
-                /*'dependency' => [
-                    'class' => 'yii\caching\DbDependency',
-                    'sql' => 'SELECT id FROM activity WHERE id = ' . Yii::$app->request->getQueryParam('id'),
-                ],*/
-            ],
         ];
     }
 
     /**
-     * Lists all Activity models.
+     * Lists all User models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new ActivitySearch();
+        $searchModel = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -59,7 +57,7 @@ class ActivityController extends Controller
     }
 
     /**
-     * Displays a single Activity model.
+     * Displays a single User model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -72,22 +70,16 @@ class ActivityController extends Controller
     }
 
     /**
-     * Creates a new Activity model.
+     * Creates a new User model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Activity();
+        $model = new User();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
-            $calendar = new Calendar();
-            $calendar->user_id = Yii::$app->user->id;
-            $calendar->activity_id = $model->id;
-            $calendar->save();
-
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect('/user-admin');
         }
 
         return $this->render('create', [
@@ -96,7 +88,7 @@ class ActivityController extends Controller
     }
 
     /**
-     * Updates an existing Activity model.
+     * Updates an existing User model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -106,8 +98,18 @@ class ActivityController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+
+            if(!empty($model->password)) {
+                $model->setPassword($model->password);
+                //$this->generatePassword(6);
+            } else {
+                unset($model->password_hash);
+            }
+
+            if($model->save()) {
+                return $this->redirect('/user-admin');
+            }
         }
 
         return $this->render('update', [
@@ -116,7 +118,7 @@ class ActivityController extends Controller
     }
 
     /**
-     * Deletes an existing Activity model.
+     * Deletes an existing User model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -130,15 +132,15 @@ class ActivityController extends Controller
     }
 
     /**
-     * Finds the Activity model based on its primary key value.
+     * Finds the User model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Activity the loaded model
+     * @return User the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Activity::findOne($id)) !== null) {
+        if (($model = User::findOne(['id' => $id])) !== null) {
             return $model;
         }
 

@@ -31,13 +31,37 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'id',
             'title',
-            'started_at',
-            'finished_at',
+            [
+                'attribute' => 'started_at',
+                'label' => 'Начало',
+                'value' => function (\app\models\Activity $model) {
+                    return Yii::$app->formatter->asDatetime($model->started_at);
+                }
+            ],
+            [
+                'attribute' => 'finished_at',
+                'label' => 'Конец',
+                'value' => function (\app\models\Activity $model) {
+                    return Yii::$app->formatter->asDatetime($model->finished_at);
+                }
+            ],
             'author_id',
             'main',
             'cycle',
-            'created_at',
-            'updated_at',
+            [
+                'attribute' => 'created_at',
+                'label' => 'Создано',
+                'value' => function (\app\models\Activity $model) {
+                    return Yii::$app->formatter->asDatetime($model->created_at);
+                }
+            ],
+            [
+                'attribute' => 'updated_at',
+                'label' => 'Изменено',
+                'value' => function (\app\models\Activity $model) {
+                    return Yii::$app->formatter->asDatetime($model->updated_at);
+                }
+            ],
         ],
     ]) ?>
 

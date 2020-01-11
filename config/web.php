@@ -5,11 +5,19 @@ $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
+    //'defaultRoute' => 'calendar/index',
+    //'catchAll' => ['site/about'],
+    'language' => 'ru',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
+        '@npm' => '@vendor/npm-asset',
+    ],
+    'modules' => [
+        'user-admin' => [
+            'class' => 'app\modules\admin\User',
+        ],
     ],
     'components' => [
         'request' => [
@@ -18,6 +26,15 @@ $config = [
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
+            'defaultDuration' => $params['cacheExpire'],
+            /*'class' => 'yii\caching\MemCache',
+            'servers' => [
+                [
+                    'host' => 'localhost',
+                    'port' => 11211,
+                    'weight' => 100,
+                ],
+            ],*/
         ],
         'user' => [
             'identityClass' => 'app\models\User',
@@ -47,10 +64,22 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                '/' => 'calendar/index',
+                'profile' => 'user/index',
+                '<action:(about|contact|login|index|logout|signup)>' => 'site/<action>',
+                //'calendar/<id:\d+>' => 'calendar/view',
+                //'activity/<id:\d+>' => 'activity/view',
             ],
         ],
         'authManager' => [
             'class' => 'yii\rbac\DbManager'
+        ],
+        'formatter' => [
+            'dateFormat' => 'php:d.m.Y',
+            'datetimeFormat' => 'php:d.m.Y H:i:s',
+            'decimalSeparator' => ',',
+            'thousandSeparator' => ' ',
+            'currencyCode' => 'RUR',
         ],
     ],
     'params' => $params,

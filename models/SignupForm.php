@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use app\components\behaviors\EmailNoticeAfterUserRegister;
 use yii\base\Model;
 
 /**
@@ -10,10 +10,21 @@ use yii\base\Model;
  */
 class SignupForm extends Model
 {
-
     public $username;
     public $email;
     public $password;
+
+    public function behaviors()
+    {
+        return [
+            EmailNoticeAfterUserRegister::class => [
+                'class' => EmailNoticeAfterUserRegister::class,
+                'username' => $this->username,
+                'email' => $this->email,
+                'password' => $this->password,
+            ]
+        ];
+    }
 
     /**
      * @inheritdoc
